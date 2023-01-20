@@ -1,0 +1,207 @@
+CREATE DATABASE db_appfood;
+USE db_appfood;
+
+CREATE TABLE users(
+	
+user_id INT PRIMARY KEY AUTO_INCREMENT,
+    
+full_name VARCHAR(129),
+   
+email VARCHAR(129),
+    
+password VARCHAR(129)
+
+);
+
+CREATE TABLE restaurant(
+	
+res_id INT PRIMARY KEY AUTO_INCREMENT,
+    
+res_name VARCHAR(129),
+    
+image VARCHAR(129),
+    
+description VARCHAR(129)
+
+);
+
+CREATE TABLE rate_res(
+	
+user_id INT,
+    
+res_id INT,
+    
+amount INT,
+    
+date_rate DATETIME,
+
+
+FOREIGN KEY (user_id) REFERENCES users(user_id),
+    
+FOREIGN KEY (res_id) REFERENCES restaurant(res_id)
+
+);
+
+CREATE TABLE like_res(
+	
+user_id INT,
+    
+res_id INT,
+    
+date_like DATETIME,
+
+    
+    
+FOREIGN KEY (user_id) REFERENCES users(user_id),
+    
+FOREIGN KEY (res_id) REFERENCES restaurant(res_id)
+
+);
+
+CREATE TABLE food_type(
+	
+type_id INT PRIMARY KEY AUTO_INCREMENT,
+    
+type_name VARCHAR(129)
+
+);
+
+CREATE TABLE food(
+	
+food_id INT PRIMARY KEY AUTO_INCREMENT,
+    
+food_name VARCHAR(129),
+    
+image VARCHAR(129),
+    
+price FLOAT,
+    
+description VARCHAR(129),
+    
+type_id INT,
+    
+    
+
+FOREIGN KEY (type_id) REFERENCES food_type(type_id)
+
+);
+
+CREATE TABLE orders(
+	
+user_id INT,
+    
+food_id INT,
+    
+amount INT,
+    
+code VARCHAR(129),
+    
+arr_sub_id VARCHAR(129),
+   
+ 
+    
+FOREIGN KEY (user_id) REFERENCES users(user_id),
+    
+FOREIGN KEY (food_id) REFERENCES food(food_id)
+
+);
+
+CREATE TABLE sub_food(
+	
+sub_id INT PRIMARY KEY AUTO_INCREMENT,
+    
+sub_name VARCHAR(129),
+    
+sub_price FLOAT,
+    
+food_id INT,
+    
+    
+
+FOREIGN KEY (food_id) REFERENCES food(food_id)
+
+);
+
+--  Câu 1 --
+
+SELECT full_name, l.user_id, COUNT(l.user_id) AS total_like 
+
+FROM users AS u
+
+RIGHT JOIN like_res AS l
+
+ON u.user_id = l.user_id
+
+GROUP BY l.user_id 
+
+ORDER BY total_like DESC
+
+LIMIT 5;
+
+-- Câu 2 -- 
+
+SELECT res_name, l.res_id,count(l.res_id) AS total_like 
+
+FROM restaurant AS r
+
+RIGHT JOIN like_res AS l
+
+ON r.res_id = l.res_id
+
+GROUP BY l.res_id
+
+ORDER BY total_like DESC
+
+LIMIT 2;
+
+-- Câu 3 --
+
+SELECT full_name, o.user_id,count(o.user_id) AS total_order
+
+FROM users AS u
+
+RIGHT JOIN orders AS o
+
+ON u.user_id = o.user_id
+
+GROUP BY o.user_id
+
+ORDER BY total_order DESC
+
+LIMIT 1;
+
+-- Câu 4 -- 
+
+SELECT u.user_id, u.full_name
+
+FROM users AS u
+
+LEFT JOIN like_res AS l
+
+ON u.user_id = l.user_id
+
+LEFT JOIN rate_res AS r
+
+ON u.user_id = r.user_id
+
+LEFT JOIN orders AS o
+
+ON u.user_id = o.user_id
+
+WHERE l.user_id IS NULL AND r.user_id IS NULL AND o.user_id IS NULL
+
+GROUP BY u.user_id;
+
+-- Câu 5 --  
+
+SELECT food_name, AVG(sub_price) AS total_price 
+
+FROM food AS f
+
+LEFT JOIN sub_food AS s
+
+ON f.food_id = s.food_id
+
+WHERE s.food_id IS NOT NULL
+
+GROUP BY food_name;
